@@ -1,0 +1,17 @@
+{
+  "name": "profile-api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.0.0",
+    "@google-cloud/firestore": "^7.0.0",
+    "google-libphonenumber": "^3.2.38"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

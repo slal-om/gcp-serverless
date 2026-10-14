@@ -1,0 +1,60 @@
+steps:
+  # Step 1: Clean install of node dependencies
+  - name: 'node:22'
+    entrypoint: 'npm'
+    args: ['ci']
+
+  # Step 2: Compile the React/Vite application into static assets
+  - name: 'node:22'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+    env:
+      # Plaintext variables injected directly from your Terraform Triggers
+      - 'VITE_API_URL=$_API_URL'
+      - 'VITE_APP_ENV=$_ENVIRONMENT'
+    # 🔒 This binds the secure token fetched below to this specific build container
+    secretEnv: ['DIALOGFLOW_TOKEN']
+
+  # Step 3: Deploy the generated /dist folder straight to Firebase Hosting
+  - name: 'us-docker.pkg.dev/firebase-cli/us/firebase'
+    args: ['deploy', '--project', '$PROJECT_ID', '--only', 'hosting']
+
+  - name: 'gcr.io/://google.com'
+    args:
+      - 'gcloud'
+      - 'beta'
+      - 'run'
+      - 'functions'
+      - 'deploy'
+      - 'firestore-api-function'
+      - '--region=us-central1'
+      - '--runtime=nodejs20'
+      - '--entry-point=getFirestoreData'
+      - '--trigger-http'
+      - '--allow-unauthenticated'
+      - '--source=./backend' # Deploys only the backend code folder
+
+  # =================================================================
+  # STEP 2: CAPTURE THE URL AND WRITE TO A .ENV FILE
+  # =================================================================
+  - name: 'gcr.io/://google.com'
+    id: 'capture-url'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Fetch the live URL dynamically
+        FUNCTION_URL=$(gcloud run services describe firestore-api-function --region=us-central1 --format='value(status.url)')
+        
+        echo "Captured Backend URL: $FUNCTION_URL"
+        
+        # Save it to the frontend directory as a React environment variable
+        # (Change to VITE_API_URL if you are using Vite instead of Create React App)
+        echo "REACT_APP_API_URL=$FUNCTION_URL" > frontend/.env
+
+
+# 🚀 Securely pulls the secret value into Cloud Build memory at runtime
+availableSecrets:
+  secretManager:
+    - versionName: 'projects/$PROJECT_ID/secrets/DIALOGFLOW_TOKEN/versions/latest'
+      env: 'DIALOGFLOW_TOKEN'

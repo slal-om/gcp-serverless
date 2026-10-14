@@ -1,0 +1,26 @@
+.card {
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  dl {
+    margin: 0 0 1rem;
+  }
+
+  dt {
+    font-weight: 600;
+    margin-top: 0.75rem;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  dd {
+    margin: 0.25rem 0 0;
+  }
+}
+
+.address {
+  white-space: pre-line;
+}
