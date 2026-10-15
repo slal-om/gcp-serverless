@@ -1,24 +1,8 @@
 steps:
-  # Step 1: Clean install of node dependencies
-  - name: 'node:22'
-    entrypoint: 'npm'
-    args: ['ci']
 
-  # Step 2: Compile the React/Vite application into static assets
-  - name: 'node:22'
-    entrypoint: 'npm'
-    args: ['run', 'build']
-    env:
-      # Plaintext variables injected directly from your Terraform Triggers
-      - 'VITE_API_URL=$_API_URL'
-      - 'VITE_APP_ENV=$_ENVIRONMENT'
-    # 🔒 This binds the secure token fetched below to this specific build container
-    secretEnv: ['DIALOGFLOW_TOKEN']
-
-  # Step 3: Deploy the generated /dist folder straight to Firebase Hosting
-  - name: 'us-docker.pkg.dev/firebase-cli/us/firebase'
-    args: ['deploy', '--project', '$PROJECT_ID', '--only', 'hosting']
-
+  # =================================================================
+  # STEP 1: CAPTURE THE URL AND WRITE TO A .ENV FILE
+  # =================================================================
   - name: 'gcr.io/://google.com'
     args:
       - 'gcloud'
@@ -33,6 +17,9 @@ steps:
       - '--trigger-http'
       - '--allow-unauthenticated'
       - '--source=./backend' # Deploys only the backend code folder
+      - '--set-env-vars'
+      - 'FIRESTORE_DB_ID=,API_TIMEOUT_MS=5000'
+      - 'CUSTOMER_COLLECTION=${CUSTOMER_COLLECTION:-customers}'
 
   # =================================================================
   # STEP 2: CAPTURE THE URL AND WRITE TO A .ENV FILE
@@ -52,6 +39,30 @@ steps:
         # (Change to VITE_API_URL if you are using Vite instead of Create React App)
         echo "REACT_APP_API_URL=$FUNCTION_URL" > frontend/.env
 
+  # Step 3: Clean install of node dependencies
+  - name: 'node:22'
+    entrypoint: 'npm'
+    args: ['ci']
+
+  # Step 2: Compile the React/Vite application into static assets
+  - name: 'node:22'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+    env:
+      # Plaintext variables injected directly from your Terraform Triggers
+      - 'VITE_API_URL=$_API_URL'
+      - 'VITE_APP_ENV=$_ENVIRONMENT'
+    # 🔒 This binds the secure token fetched below to this specific build container
+    secretEnv: ['DIALOGFLOW_TOKEN']
+
+  # Step 3: Deploy the generated /dist folder straight to Firebase Hosting
+  - name: 'us-docker.pkg.dev/firebase-cli/us/firebase'
+    args: ['deploy', '--project', '$PROJECT_ID', '--only', 'hosting']
+
+
+# Define the default value for the Cloud Build substitution here
+substitutions:
+  _CUSTOMER_COLLECTION: 'customers'
 
 # 🚀 Securely pulls the secret value into Cloud Build memory at runtime
 availableSecrets:

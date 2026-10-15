@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getProfile, saveProfile } from '../../api/profile.js';
+import { getProfile, saveProfile } from './api/profile.js';
 import ProfileForm from './components/ProfileForm.jsx';
 import ProfileView from './components/ProfileView.jsx';
 import MessengerCode from './MessengerCode.jsx';

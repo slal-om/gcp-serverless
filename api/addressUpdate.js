@@ -2,7 +2,7 @@ import { http } from '@google-cloud/functions-framework';
 import { Firestore } from '@google-cloud/firestore';
 import gPhoneNumber from 'google-libphonenumber';
 
-const firestore = new Firestore();
+const firestore = new Firestore({ databaseId: process.env.FIRESTORE_DB_ID });
 const phoneUtil = gPhoneNumber.PhoneNumberUtil.getInstance();
 
 // Helper: Validate Name (No numbers allowed)
@@ -102,7 +102,8 @@ http('customerService', async (req, res) => {
         if (doc.exists) {
           results.push(doc.data());
         }
-      } 
+      }
+
       // 2. Search by Phone Number
       else if (phone) {
         if (!validatePhone(phone)) {

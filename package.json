@@ -1,0 +1,10 @@
+{
+  "name": "gcp-serverless",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "build:web": "pnpm --filter web build",
+    "start:api": "pnpm --filter api start",
+    "deploy:frontend": "pnpm build:web && firebase deploy --only hosting"
+  }
+}

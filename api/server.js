@@ -11,7 +11,7 @@ if (!['memory', 'firestore'].includes(DATA_STORE)) {
   throw new Error('DATA_STORE must be memory or firestore');
 }
 
-const firestore = DATA_STORE === 'firestore' ? new Firestore() : null;
+const firestore = DATA_STORE === 'firestore' ? new Firestore({ databaseId: process.env.FIRESTORE_DB_ID }) : null;
 let memoryProfile = {
   name: process.env.CUSTOMER_NAME || 'Taylor Morgan',
   address: process.env.CUSTOMER_ADDRESS || '100 Main Street',
